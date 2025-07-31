@@ -1,19 +1,27 @@
 # 📚 Fundamentos do Node.js
 
-Este projeto é da Pós Tech Developer 360 realizado pela Faculdade de Tecnologia da RocketSeat, um estudo completo sobre os conceitos fundamentais do Node.js, abordando desde a criação de servidores HTTP básicos até o uso avançado de Streams e Buffers.
+Este projeto é da Pós Tech Developer 360 realizado pela Faculdade de Tecnologia da RocketSeat, um estudo completo sobre os conceitos fundamentais do Node.js, abordando desde a criação de servidores HTTP básicos até o uso avançado de Streams, Buffers, e construção de APIs REST.
 
 ## 🏗️ Estrutura do Projeto
 
 ```
 01-fundamentos-nodejs/
-├── package.json              # Configurações do projeto NPM
-├── src/                      # Código fonte principal
-│   └── server.js            # Servidor HTTP com API REST básica
-└── streams/                 # Exemplos de trabalho com Streams
-    ├── buffer.js           # Conceitos básicos de Buffer
-    ├── fundamentals.js     # Fundamentos das Streams
-    ├── fake-upload-to-http-stream.js  # Cliente que simula upload via stream
-    └── stream-http-server.js          # Servidor que trabalha com streams
+├── package.json                      # Configurações do projeto NPM
+├── db.json                          # Banco de dados JSON simples
+├── src/                             # Código fonte principal
+│   ├── server.js                    # Servidor HTTP principal
+│   ├── routes.js                    # Definição das rotas da API
+│   ├── database.js                  # Classe para manipulação do banco JSON
+│   ├── middlewares/
+│   │   └── json.js                  # Middleware para parsing JSON
+│   └── utils/
+│       ├── build-route-path.js      # Utilitário para construção de rotas
+│       └── extract-query-params.js  # Extração de query parameters
+└── streams/                         # Exemplos de trabalho com Streams
+    ├── buffer.js                    # Conceitos básicos de Buffer
+    ├── fundamentals.js              # Fundamentos das Streams
+    ├── fake-upload-to-http-stream.js # Cliente que simula upload via stream
+    └── stream-http-server.js        # Servidor que trabalha com streams
 ```
 
 ## 📦 Configuração do Projeto (`package.json`)
@@ -34,66 +42,66 @@ O arquivo `package.json` define as configurações básicas do projeto:
 }
 ```
 
-## 🖥️ Servidor Principal (`src/server.js`)
+## 🖥️ API REST de Usuários
 
-### Conceitos Abordados
+O projeto implementa uma API REST completa para gerenciamento de usuários, demonstrando os principais conceitos do desenvolvimento backend com Node.js puro.
 
-Este arquivo implementa um servidor HTTP básico que demonstra:
+### Arquitetura da API
 
-#### 1. **Métodos HTTP**
+#### 1. **Servidor Principal (`src/server.js`)**
+
+Implementa um servidor HTTP que demonstra:
+
+- **Métodos HTTP**: GET, POST, PUT, DELETE
+- **Roteamento dinâmico** com parâmetros e query strings
+- **Middleware de parsing JSON**
+- **Tratamento de erros** e status codes apropriados
+
+#### 2. **Sistema de Rotas (`src/routes.js`)**
+
+Implementa todas as operações CRUD para usuários:
+
+- **GET `/users`**: Lista todos os usuários com filtro por busca
+- **POST `/users`**: Cria um novo usuário
+- **PUT `/users/:id`**: Atualiza um usuário completo
+- **DELETE `/users/:id`**: Remove um usuário
+
+#### 3. **Banco de Dados (`src/database.js`)**
+
+Classe que simula um banco de dados usando arquivo JSON:
+
+- **Persistência automática** em arquivo
+- **Operações CRUD** (Create, Read, Update, Delete)
+- **Sistema de busca** com filtros dinâmicos
+- **Carregamento assíncrono** dos dados
+
+#### 4. **Utilitários**
+
+- **`json.js`**: Middleware para parsing do body das requisições
+- **`build-route-path.js`**: Construção de rotas com parâmetros dinâmicos
+- **`extract-query-params.js`**: Extração de parâmetros de query string
+
+### Conceitos HTTP Abordados
+
+#### **Métodos HTTP**
 
 - **GET**: Buscar recursos do backend
 - **POST**: Criar novos recursos
 - **PUT**: Atualizar recursos completos
-- **PATCH**: Atualizar informações específicas
 - **DELETE**: Remover recursos
 
-#### 2. **Stateless vs Stateful**
+#### **Tipos de Parâmetros**
 
-O servidor é **stateless** - cada requisição é independente e não mantém estado entre chamadas até o momento.
+- **Query Parameters**: Filtros e configurações opcionais (`?search=joao&limit=10`)
+- **Route Parameters**: Identificação de recursos específicos (`/users/:id`)
+- **Request Body**: Dados enviados via JSON no corpo da requisição
 
-#### 3. **JSON (JavaScript Object Notation)**
+#### **Status Codes**
 
-Formato padrão para troca de dados entre cliente e servidor.
-
-#### 4. **Headers HTTP**
-
-Metadados que acompanham requisições e respostas.
-
-#### 5. **HTTP Status Codes**
-
-- `200`: Sucesso
-- `201`: Criado com sucesso
-- `404`: Não encontrado
-
-### Funcionalidades Implementadas
-
-#### API de Usuários
-
-- **GET `/users`**: Lista todos os usuários cadastrados
-- **POST `/users`**: Cria um novo usuário
-
-### Processamento do Body da Requisição
-
-```javascript
-const buffers = []
-for await (const chunk of req) {
-  buffers.push(chunk)
-}
-
-try {
-  req.body = JSON.parse(Buffer.concat(buffers).toString())
-} catch {
-  req.body = null
-}
-```
-
-Este trecho demonstra como:
-
-1. **Ler dados em chunks**: O body da requisição chega em pedaços
-2. **Trabalhar com Buffers**: Concatenar os chunks em um buffer único
-3. **Parse JSON**: Converter o buffer em objeto JavaScript
-4. **Tratamento de erros**: Lidar com JSON inválido
+- `200`: Sucesso na consulta
+- `201`: Recurso criado com sucesso
+- `204`: Operação realizada sem conteúdo de retorno
+- `404`: Recurso não encontrado
 
 ## 🌊 Streams (`streams/`)
 
@@ -223,7 +231,7 @@ const fullStreamContent = Buffer.concat(buffers).toString()
 
 ## 🚀 Como Executar
 
-### 1. Servidor Principal
+### 1. Servidor da API (Porta 3333)
 
 ```bash
 npm run dev
@@ -231,44 +239,75 @@ npm run dev
 node --watch src/server.js
 ```
 
-- Acessa: http://localhost:3333
-- API disponível em `/users`
+- **URL**: http://localhost:3333
+- **Endpoints disponíveis**: `/users`
+- **Auto-reload**: O servidor reinicia automaticamente ao detectar mudanças no código
 
-### 2. Servidor de Streams
+### 2. Servidor de Streams (Porta 3334)
 
 ```bash
 node streams/stream-http-server.js
 ```
 
-- Escuta na porta 3334
-
 ### 3. Exemplos de Streams
 
 ```bash
-# Fundamentos das streams
+# Fundamentos das streams (demonstração de pipeline)
 node streams/fundamentals.js
 
-# Exemplo de buffer
+# Exemplo de buffer básico
 node streams/buffer.js
 
-# Cliente de upload (requer servidor na porta 3334)
+# Cliente de upload via stream (requer servidor na porta 3334)
 node streams/fake-upload-to-http-stream.js
 ```
 
 ## 🧪 Testando a API
 
-### Listar usuários
+### 1. Listar todos os usuários
 
 ```bash
 curl http://localhost:3333/users
 ```
 
-### Criar usuário
+### 2. Buscar usuários com filtro
+
+```bash
+curl "http://localhost:3333/users?search=joao"
+```
+
+### 3. Criar um novo usuário
 
 ```bash
 curl -X POST http://localhost:3333/users \
   -H "Content-Type: application/json" \
-  -d '{"name": "João", "email": "joao@email.com"}'
+  -d '{"name": "João Silva", "email": "joao@email.com"}'
+```
+
+### 4. Atualizar um usuário
+
+```bash
+curl -X PUT http://localhost:3333/users/SEU_ID_AQUI \
+  -H "Content-Type: application/json" \
+  -d '{"name": "João Santos", "email": "joao.santos@email.com"}'
+```
+
+### 5. Deletar um usuário
+
+```bash
+curl -X DELETE http://localhost:3333/users/SEU_ID_AQUI
+```
+
+### Estrutura de Dados
+
+**Usuário:**
+
+```json
+{
+  "id": "uuid-gerado-automaticamente",
+  "name": "Nome do usuário",
+  "email": "email@exemplo.com"
+}
 ```
 
 ## 📈 Vantagens das Streams
@@ -295,19 +334,100 @@ Cenário: Arquivo de 1GB com 1.000.000 de registros
 
 ## 🔄 Evolução do Projeto
 
-À medida que o projeto cresce, serão adicionados:
+### ✅ Funcionalidades Implementadas
 
-- ✅ Conceitos básicos de HTTP
-- ✅ Trabalho com Buffers
-- ✅ Streams Readable, Writable e Transform
-- ✅ Integração HTTP + Streams
-- 🔄 Middleware de parsing
-- 🔄 Roteamento avançado
-- 🔄 Manipulação de arquivos
-- 🔄 Banco de dados
-- 🔄 Autenticação
-- 🔄 Testes
+- **Servidor HTTP básico** com Node.js puro
+- **API REST completa** para usuários (CRUD)
+- **Sistema de roteamento** com parâmetros dinâmicos
+- **Middleware customizado** para parsing JSON
+- **Banco de dados** simulado com persistência em arquivo
+- **Sistema de busca** com filtros
+- **Streams avançadas** (Readable, Writable, Transform)
+- **Upload via streams** com exemplo prático
+- **Manipulação de Buffers** para processamento de dados binários
+
+### 🚧 Próximas Implementações
+
+- Validação de dados de entrada
+- Tratamento de erros mais robusto
+- Sistema de logs
+- Paginação de resultados
+- Middlewares de autenticação
+- Testes automatizados
+- Documentação da API (OpenAPI/Swagger)
+
+### � Conceitos Fundamentais Cobertos
+
+- **ES Modules** (import/export)
+- **Streams** (Readable, Writable, Transform)
+- **Buffers** e manipulação de dados binários
+- **HTTP** (métodos, status codes, headers)
+- **REST API** design e implementação
+- **JSON** parsing e serialização
+- **RegExp** para roteamento dinâmico
+- **File System** para persistência
+- **Async/Await** e Promises
 
 ---
 
-**Observação**: Este é um projeto educacional focado no aprendizado dos fundamentos do Node.js. Cada arquivo foi criado para demonstrar conceitos específicos de forma isolada e didática.
+## 💡 Destaques Técnicos
+
+### Roteamento Dinâmico
+
+O projeto implementa um sistema de roteamento avançado que suporta:
+
+```javascript
+// Definição de rota com parâmetro
+buildRoutePath("/users/:id")
+// Gera: /^\/users\/(?<id>[a-z0-9-_]+)(?<query>\?(.*))?$/
+
+// Extração automática de parâmetros
+req.params.id // ID do usuário
+req.query.search // Parâmetro de busca
+```
+
+### Middleware Customizado
+
+```javascript
+// Middleware JSON parser personalizado
+export async function json(req, res) {
+  const buffers = []
+  for await (const chunk of req) {
+    buffers.push(chunk)
+  }
+
+  try {
+    req.body = JSON.parse(Buffer.concat(buffers).toString())
+  } catch {
+    req.body = null
+  }
+
+  res.setHeader("Content-type", "application/json")
+}
+```
+
+### Banco de Dados Simulado
+
+```javascript
+// Persistência automática em arquivo JSON
+#persist() {
+  fs.writeFile(databasePath, JSON.stringify(this.#database))
+}
+
+// Sistema de busca flexível
+select(table, search) {
+  let data = this.#database[table] ?? []
+
+  if (search) {
+    data = data.filter((row) => {
+      return Object.entries(search).some(([key, value]) => {
+        return row[key].toLowerCase().includes(value.toLowerCase())
+      })
+    })
+  }
+
+  return data
+}
+```
+
+**Observação**: Este é um projeto educacional focado no aprendizado dos fundamentos do Node.js. Cada arquivo foi criado para demonstrar conceitos específicos de forma isolada e didática, sem o uso de frameworks externos.
